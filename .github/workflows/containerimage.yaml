@@ -6,7 +6,7 @@ on:
     tags:
     - '*'
 jobs:
-  build-latest:
+  build-image:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
