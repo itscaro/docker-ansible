@@ -1,0 +1,31 @@
+name: Build itscaro/ansible:latest
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - '*'
+jobs:
+  build-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build & Push latest
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        DOCKER_HUB_LOGIN: ${{ secrets.DOCKER_HUB_LOGIN }}
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: |
+        docker build . --file Dockerfile --tag ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:latest
+        echo "${DOCKER_HUB_TOKEN}" | docker login -u "${DOCKER_HUB_LOGIN}" --password-stdin
+        docker push ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:latest
+    - name: Build & Push Tag
+      if: contains(github.ref, 'tags')
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        DOCKER_HUB_LOGIN: ${{ secrets.DOCKER_HUB_LOGIN }}
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+        REF: ${{ github.ref }}
+      run: |
+        docker tag ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:latest ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${REF##*/}
+        docker push ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${REF##*/}
