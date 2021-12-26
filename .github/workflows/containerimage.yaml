@@ -11,6 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build & Push latest
+      if: ${{ github.ref == 'refs/heads/main' }}
       env:
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         DOCKER_HUB_LOGIN: ${{ secrets.DOCKER_HUB_LOGIN }}
@@ -19,13 +20,22 @@ jobs:
         docker build . --file Dockerfile --tag ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:latest
         echo "${DOCKER_HUB_TOKEN}" | docker login -u "${DOCKER_HUB_LOGIN}" --password-stdin
         docker push ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:latest
+    - name: Build & Push ansible 4
+      if: ${{ github.ref == 'refs/heads/4' }}
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        DOCKER_HUB_LOGIN: ${{ secrets.DOCKER_HUB_LOGIN }}
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: |
+        docker build . --file Dockerfile --tag ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${GITHUB_REF##*/}
+        echo "${DOCKER_HUB_TOKEN}" | docker login -u "${DOCKER_HUB_LOGIN}" --password-stdin
+        docker push ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${GITHUB_REF##*/}
     - name: Build & Push Tag
       if: contains(github.ref, 'tags')
       env:
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         DOCKER_HUB_LOGIN: ${{ secrets.DOCKER_HUB_LOGIN }}
         GITHUB_CONTEXT: ${{ toJson(github) }}
-        REF: ${{ github.ref }}
       run: |
-        docker tag ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:latest ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${REF##*/}
-        docker push ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${REF##*/}
+        docker tag ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:latest ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${GITHUB_REF##*/}
+        docker push ${{ secrets.DOCKER_HUB_LOGIN }}/ansible:${GITHUB_REF##*/}
