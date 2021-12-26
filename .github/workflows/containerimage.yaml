@@ -2,7 +2,7 @@ name: Build itscaro/ansible:latest
 on:
   push:
     branches:
-    - master
+    - main
     tags:
     - '*'
 jobs:
