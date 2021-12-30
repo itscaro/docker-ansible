@@ -7,4 +7,6 @@ COPY requirements.txt .
 RUN python -m pip install --upgrade pip && \
     pip install -r requirements.txt
 
-ENTRYPOINT ["/bin/bash", "-l", "-c"]
+ENTRYPOINT ["/bin/bash", "-c"]
+
+SHELL ["/bin/bash", "-c"]
